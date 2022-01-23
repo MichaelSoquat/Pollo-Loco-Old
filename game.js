@@ -2,6 +2,7 @@ let canvas;
 let ctx;
 let character_x = 100;
 let character_y = 250;
+let character_energy = 100;
 let isMovingRight = false;
 let isMovingLeft = false;
 let bg_elements = 0;
@@ -12,6 +13,7 @@ let characterGraphicsLeft = ['img/charakter_left_1.png', 'img/charakter_left_2.p
 let characterGraphicIndex = 0;
 let cloudOffset = 0;
 let chickens = [];
+
 
 // Game Config!
 let JUMP_TIME = 300; //in ms
@@ -29,6 +31,22 @@ function init() {
     calculateChickenPosition();
 
     listenForKeys();
+    checkForCollision();
+}
+function checkForCollision() {
+    setInterval(function () {
+        for (let i = 0; i < chickens.length; i++) {
+            let chicken = chickens[i];
+            let chicken_x = chicken.position_x + bg_elements;
+            if ((chicken_x - 40) < character_x && (chicken_x + 40) > character_x) {
+                if (character_y > 210 && character_energy > 0) {
+                    character_energy = character_energy - 1;
+                }
+
+
+            }
+        }
+    }, 100)
 }
 function calculateChickenPosition() {
 
@@ -42,9 +60,12 @@ function calculateChickenPosition() {
 
 function createChickenList() {
     chickens = [
-        createChicken(1, 200),
-        createChicken(1, 400),
-        createChicken(1, 600),
+        createChicken(1, 700),
+        createChicken(2, 1400),
+        createChicken(1, 1800),
+        createChicken(2, 2500),
+        createChicken(2, 3000),
+        createChicken(1, 3600)
     ]
 }
 function calculateCloudOffset() {
@@ -70,7 +91,7 @@ function checkForRunning() {
             characterGraphicIndex = characterGraphicIndex + 1;
         }
 
-        if(!isMovingRight && !isMovingLeft) {
+        if (!isMovingRight && !isMovingLeft) {
             AUDIO_RUNNING.pause();
         }
 
@@ -84,8 +105,18 @@ function draw() {
     updateCharacter();
     drawChicken();
     requestAnimationFrame(draw);
+    drawEnergyBar();
 }
 
+function drawEnergyBar() {
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "blue";
+    ctx.fillRect(505, 15, 2 * character_energy, 30);
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = "black";
+    ctx.fillRect(500, 10, 210, 40);
+    ctx.globalAlpha = 1;
+}
 function drawChicken() {
 
     for (i = 0; i < chickens.length; i++) {
@@ -100,7 +131,7 @@ function createChicken(type, position_x) {
         "position_x": position_x,
         "position_y": 325,
         "scale": 0.6,
-        "speed": Math.random()*5
+        "speed": Math.random() * 5
     };
 }
 
@@ -137,6 +168,13 @@ function drawBackground() {
 
     addBackgroundObject('img/cloud1.png', 800 - cloudOffset, 20, 0.8, 1);
     addBackgroundObject('img/cloud2.png', 1350 - cloudOffset, 20, 0.6, 1);
+
+    addBackgroundObject('img/cloud1.png', 1800 - cloudOffset, 20, 0.8, 1);
+    addBackgroundObject('img/cloud2.png', 2350 - cloudOffset, 20, 0.6, 1);
+
+    addBackgroundObject('img/cloud1.png', 2800 - cloudOffset, 20, 0.8, 1);
+    addBackgroundObject('img/cloud2.png', 3350 - cloudOffset, 20, 0.6, 1);
+
     drawGround();
 
 }
@@ -148,7 +186,7 @@ function drawGround() {
         bg_elements = bg_elements - GAME_SPEED;
     }
 
-    if (isMovingLeft) {
+    if (isMovingLeft && bg_elements < 500) {
         bg_elements = bg_elements + GAME_SPEED;
     }
 
@@ -162,6 +200,16 @@ function drawGround() {
     addBackgroundObject('img/bg_elem_2.png', 1450, 120, 0.6, 0.5);
     addBackgroundObject('img/bg_elem_1.png', 1700, 255, 0.4, 0.4);
     addBackgroundObject('img/bg_elem_2.png', 2000, 260, 0.3, 0.2);
+
+    addBackgroundObject('img/bg_elem_1.png', 2300, 195, 0.6, 0.4);
+    addBackgroundObject('img/bg_elem_2.png', 2450, 120, 0.6, 0.5);
+    addBackgroundObject('img/bg_elem_1.png', 2700, 255, 0.4, 0.4);
+    addBackgroundObject('img/bg_elem_2.png', 3000, 260, 0.3, 0.2);
+
+    addBackgroundObject('img/bg_elem_1.png', 3300, 195, 0.6, 0.4);
+    addBackgroundObject('img/bg_elem_2.png', 3450, 120, 0.6, 0.5);
+    addBackgroundObject('img/bg_elem_1.png', 3700, 255, 0.4, 0.4);
+    addBackgroundObject('img/bg_elem_2.png', 4000, 260, 0.3, 0.2);
 
     // Draw ground
     ctx.fillStyle = "#FFE699";
