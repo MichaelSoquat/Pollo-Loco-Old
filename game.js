@@ -13,13 +13,15 @@ let characterGraphicsLeft = ['img/charakter_left_1.png', 'img/charakter_left_2.p
 let characterGraphicIndex = 0;
 let cloudOffset = 0;
 let chickens = [];
-
+let placedBottles = [1000, 1700, 2500, 3300, 3800];
+let collectedBottles = 0;
 
 // Game Config!
 let JUMP_TIME = 300; //in ms
 let GAME_SPEED = 7;
 let AUDIO_RUNNING = new Audio('audio/running.wav');
 let AUDIO_JUMP = new Audio('audio/jump.wav');
+let AUDIO_BOTTLE = new Audio('audio/bottle.wav')
 
 function init() {
     canvas = document.getElementById('canvas');
@@ -35,6 +37,8 @@ function init() {
 }
 function checkForCollision() {
     setInterval(function () {
+
+        // Check Chicken
         for (let i = 0; i < chickens.length; i++) {
             let chicken = chickens[i];
             let chicken_x = chicken.position_x + bg_elements;
@@ -46,6 +50,18 @@ function checkForCollision() {
 
             }
         }
+        // Check Bottles
+        for (let i = 0; i < placedBottles.length; i++) {
+            let bottle_x = placedBottles[i] + bg_elements;
+            if ((bottle_x - 40) < character_x && (bottle_x + 40) > character_x) {
+                if (character_y > 210) {
+                    placedBottles.splice(i, 1);
+                    AUDIO_BOTTLE.play();
+                    collectedBottles ++;
+                }
+            }
+        }
+
     }, 100)
 }
 function calculateChickenPosition() {
@@ -104,8 +120,28 @@ function draw() {
     drawBackground();
     updateCharacter();
     drawChicken();
+    drawBottles();
     requestAnimationFrame(draw);
     drawEnergyBar();
+    drawInformation();
+}
+
+function drawInformation() {
+
+    let base_image = new Image();
+    base_image.src = 'img/tabasco.png';
+    if (base_image.complete) {
+        ctx.drawImage(base_image, 0, 0, base_image.width * 0.5, base_image.height * 0.5);
+    }
+    ctx.font = '30px Times New Roman';
+    ctx.fillText('x' + collectedBottles, 45, 33);
+}
+
+function drawBottles() {
+    for (let i = 0; i < placedBottles.length; i++) {
+        let bottle_x = placedBottles[i];
+        addBackgroundObject('img/tabasco.png', bottle_x, 318, 0.7)
+    }
 }
 
 function drawEnergyBar() {
@@ -258,6 +294,7 @@ function listenForKeys() {
 
     document.addEventListener("keyup", e => {
         const k = e.key;
+
         if (k == 'ArrowRight') {
             isMovingRight = false;
             // character_x = character_x + 5;
@@ -267,7 +304,9 @@ function listenForKeys() {
             isMovingLeft = false;
             // character_x = character_x - 5;
         }
-
+        if (k == 'd') {
+            collectedBottles--;
+        }
         // if(e.code == 'Space') {
         //     isJumping = false;
 
