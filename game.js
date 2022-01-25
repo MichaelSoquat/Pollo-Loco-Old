@@ -21,6 +21,8 @@ let bottleThrowTime = 0;
 let thrownBottleX = 0;
 let thrownBottleY = 0;
 let bossDefeatedAt = 0;
+let game_finished = false;
+let character_lost_at = 0;
 
 // Game Config!
 let JUMP_TIME = 300; //in ms
@@ -33,10 +35,12 @@ let AUDIO_THROW = new Audio('audio/throw.wav');
 let AUDIO_CHICKEN = new Audio('audio/chicken.wav');
 let AUDIO_GLASS = new Audio('audio/glass.flac');
 let AUDIO_MUSIC = new Audio('audio/music.mp3');
+let AUDIO_WIN = new Audio('audio/win.wav');
 AUDIO_MUSIC.loop = true;
 AUDIO_MUSIC.volume = 0.2;
 
 function init() {
+
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     createChickenList();
@@ -55,8 +59,14 @@ function checkForCollision() {
             let chicken = chickens[i];
             let chicken_x = chicken.position_x + bg_elements;
             if ((chicken_x - 40) < character_x && (chicken_x + 40) > character_x) {
-                if (character_y > 210 && character_energy > 0) {
-                    character_energy = character_energy - 1;
+                if (character_y > 210) {
+                    if(character_energy > 0) {
+                    character_energy = character_energy - 10;
+                
+                } else {
+                    character_lost_at = new Date().getTime();
+                    game_finished = true;
+                }
                 }
 
 
@@ -79,12 +89,22 @@ function checkForCollision() {
             if (final_boss_energy > 0) {
                 final_boss_energy = final_boss_energy - 10;
                 AUDIO_GLASS.play();
-            } else {
+            } else if (bossDefeatedAt == 0) {
                 bossDefeatedAt = new Date().getTime();
+                finishLevel();
             }
         }
 
     }, 100)
+}
+
+function finishLevel() {
+    AUDIO_CHICKEN.play();
+    setTimeout(function () {
+        AUDIO_WIN.play();
+    }, 500);
+    game_finished = true;
+
 }
 function calculateChickenPosition() {
 
@@ -138,20 +158,36 @@ function checkForRunning() {
 }
 
 function draw() {
-
     drawBackground();
-    updateCharacter();
-    drawChicken();
-    drawBottles();
-    requestAnimationFrame(draw);
-    drawEnergyBar();
-    drawInformation();
-    drawThrowBottle();
+    if (game_finished) {
+        // draw success screen
+        drawFinalScreen();
+    }
+    else {
+        updateCharacter();
+        drawChicken();
+        drawBottles();
+        requestAnimationFrame(draw);
+        drawEnergyBar();
+        drawInformation();
+        drawThrowBottle();
+    }
     drawFinalBoss();
+}
+
+function drawFinalScreen() {
+    ctx.font = '80px Times New Roman';
+    let msg = 'YOU WON!';
+
+    if(character_lost_at > 0) {
+        msg = 'YOU LOST!';
+    }
+    ctx.fillText(msg, 220, 200);
 }
 
 function drawFinalBoss() {
     let chicken_x = BOSS_POSITION;
+    
     let chicken_y = 100;
 
     let bossImage = 'img/chicken_big.png';
@@ -170,7 +206,7 @@ function drawFinalBoss() {
         ctx.fillRect(BOSS_POSITION + bg_elements, 95, 2 * final_boss_energy, 10);
         ctx.globalAlpha = 0.2;
         ctx.fillStyle = "black";
-        ctx.fillRect(BOSS_POSITION-2 + bg_elements, 92, 205, 15);
+        ctx.fillRect(BOSS_POSITION - 2 + bg_elements, 92, 205, 15);
         ctx.globalAlpha = 1;
     }
 
